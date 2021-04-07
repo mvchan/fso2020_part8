@@ -15,16 +15,35 @@ query {
 }
 `
 
+const ALL_BOOKS = gql`
+query {
+  allBooks  {
+    title
+    author
+    published
+  }
+}
+`
+
 const App = () => {
   const authorQuery = useQuery(ALL_AUTHORS)
+  const bookQuery = useQuery(ALL_BOOKS)
+
   const [page, setPage] = useState('authors')
   const [authors, setAuthors] = useState(null)
+  const [books, setBooks] = useState(null)
 
   useEffect(() => {
     if (authorQuery.data) {
       setAuthors(authorQuery.data.allAuthors)
     }
   }, [authorQuery])
+
+  useEffect(() => {
+    if (bookQuery.data) {
+      setBooks(bookQuery.data.allBooks)
+    }
+  }, [bookQuery])
 
   return (
     <div>
@@ -41,6 +60,7 @@ const App = () => {
 
       <Books
         show={page === 'books'}
+        books={books}
       />
 
       <NewBook
