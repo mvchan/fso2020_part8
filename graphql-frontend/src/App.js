@@ -1,52 +1,34 @@
-
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
-import { gql, useQuery } from '@apollo/client';
 
-const ALL_AUTHORS = gql`
-query {
-  allAuthors  {
-    name
-    born
-    bookCount
-  }
-}
-`
+const Notify = ({ errorMessage }) => {
+  if (!errorMessage)
+    return null
 
-const ALL_BOOKS = gql`
-query {
-  allBooks  {
-    title
-    author
-    published
-  }
+  return (
+    <div style={{color: 'red'}}>
+      {errorMessage}
+    </div>
+  )
 }
-`
 
 const App = () => {
-  const authorQuery = useQuery(ALL_AUTHORS)
-  const bookQuery = useQuery(ALL_BOOKS)
-
+  
   const [page, setPage] = useState('authors')
-  const [authors, setAuthors] = useState(null)
-  const [books, setBooks] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
-  useEffect(() => {
-    if (authorQuery.data) {
-      setAuthors(authorQuery.data.allAuthors)
-    }
-  }, [authorQuery])
-
-  useEffect(() => {
-    if (bookQuery.data) {
-      setBooks(bookQuery.data.allBooks)
-    }
-  }, [bookQuery])
+  const notify = (message) => {
+    setErrorMessage(message)
+    setTimeout(() => {
+      setErrorMessage(null)
+    }, 3000)
+  }
 
   return (
     <div>
+      <Notify errorMessage={errorMessage} />
       <div>
         <button onClick={() => setPage('authors')}>authors</button>
         <button onClick={() => setPage('books')}>books</button>
@@ -55,16 +37,15 @@ const App = () => {
 
       <Authors
         show={page === 'authors'}
-        authors={authors}
       />
 
       <Books
         show={page === 'books'}
-        books={books}
       />
 
       <NewBook
         show={page === 'add'}
+        setError={notify}
       />
 
     </div>
