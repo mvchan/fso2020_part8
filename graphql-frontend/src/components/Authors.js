@@ -7,15 +7,9 @@ const Authors = (props) => {
   const authorQuery = useQuery(ALL_AUTHORS)
   const [authors, setAuthors] = useState(null)
 
-  useEffect(() => {
-    if (authorQuery.data) {
-      setAuthors(authorQuery.data.allAuthors)
-    }
-  }, [authorQuery])
-
   // refetchQueries will update the cache for the other views
   // onError allows error handling
-  const [ editAuthor ] = useMutation(EDIT_AUTHOR, {
+  const [ editAuthor, result ] = useMutation(EDIT_AUTHOR, {
     refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
       props.setError("All fields must be filled out")
@@ -34,6 +28,18 @@ const Authors = (props) => {
     event.target.name.value = ''
     event.target.born.value = ''
   }
+
+  useEffect(() => {
+    if (authorQuery.data) {
+      setAuthors(authorQuery.data.allAuthors)
+    }
+  }, [authorQuery])
+
+  useEffect(() => {
+    if (result.data && result.data.editAuthor === null) { 
+      props.setError('Author not found')
+    }
+  }, [result.data])
 
   if (!props.show || !authors) {
     return null
@@ -65,10 +71,12 @@ const Authors = (props) => {
       <h2>Set birthyear</h2>
       <form onSubmit={submit}>
         <div>
-          name
-          <input
-            name="name"
-          />
+          name        
+          <select name="name">
+            {authors.map(author =>
+              <option key={author.name} value={author.name}>{author.name}</option>
+            )}
+          </select>
         </div>
         <div>
           born
