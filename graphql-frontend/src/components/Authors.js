@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { useQuery } from '@apollo/client';
-import { ALL_AUTHORS } from '../queries'
+import { useQuery, useMutation } from '@apollo/client';
+import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries'
 
 const Authors = (props) => {
 
@@ -12,6 +12,28 @@ const Authors = (props) => {
       setAuthors(authorQuery.data.allAuthors)
     }
   }, [authorQuery])
+
+  // refetchQueries will update the cache for the other views
+  // onError allows error handling
+  const [ editAuthor ] = useMutation(EDIT_AUTHOR, {
+    refetchQueries: [{ query: ALL_AUTHORS }],
+    onError: (error) => {
+      props.setError("All fields must be filled out")
+    }
+  })
+
+  const submit = async (event) => {
+    event.preventDefault()
+    console.log('update author...')
+
+    const name = event.target.name.value
+    const setBornTo = parseInt(event.target.born.value)
+
+    editAuthor({  variables: { name, setBornTo } })
+
+    event.target.name.value = ''
+    event.target.born.value = ''
+  }
 
   if (!props.show || !authors) {
     return null
@@ -40,7 +62,22 @@ const Authors = (props) => {
           )}
         </tbody>
       </table>
-
+      <h2>Set birthyear</h2>
+      <form onSubmit={submit}>
+        <div>
+          name
+          <input
+            name="name"
+          />
+        </div>
+        <div>
+          born
+          <input
+            name="born"
+          />
+        </div>
+        <button type='submit'>update author</button>
+      </form>
     </div>
   )
 }
