@@ -18,6 +18,8 @@
   "homepage": "https://github.com/mvchan/fso2020_part8#readme",
   "dependencies": {
     "apollo-server": "^2.22.1",
-    "graphql": "^15.5.0"
+    "graphql": "^15.5.0",
+    "mongoose": "^5.12.3",
+    "mongoose-unique-validator": "^2.0.3"
   }
 }
