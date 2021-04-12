@@ -3,12 +3,11 @@ const { v1: uuid } = require('uuid')
 const mongoose = require('mongoose')
 const Author = require('./models/author')
 const Book = require('./models/book')
+const config = require('./utils/config')
 
-const MONGODB_URI = "mongodb+srv://fullstack:ocwK3NaK0PFNYnul@cluster0.9da9v.mongodb.net/graphql?retryWrites=true&w=majority"
+console.log('connecting to', config.MONGODB_URI)
 
-console.log('connecting to', MONGODB_URI)
-
-mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
+mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, useCreateIndex: true })
   .then(() => {
     console.log('connected to MongoDB')
   })
