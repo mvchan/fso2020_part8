@@ -12,7 +12,7 @@ const Authors = (props) => {
   const [ editAuthor, result ] = useMutation(EDIT_AUTHOR, {
     refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
-      props.setError("All fields must be filled out to update birth year")
+      props.setError("Error: " + error.message)
     }
   })
 
