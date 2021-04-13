@@ -26,7 +26,7 @@ const typeDefs = gql`
   type Book {
     title: String!
     published: Int!
-    author: String!
+    author: Author!
     genres: [String]!
     id: ID!
   }
@@ -54,22 +54,17 @@ const typeDefs = gql`
 
 const resolvers = {
   Author: {
-    bookCount: async (root) => {
-      return Book.find({ author: root._id }).countDocuments()
-    }
+    bookCount: async (root) => Book.find({ author: root._id }).countDocuments()
   },
   
   Query: {
     bookCount: () => Book.collection.countDocuments(),
     authorCount: () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
-      let result = await Book.find({})
-
-      if (!args.author && !args.genre)
-        return result
-
+      let result = await Book.find({}).populate('author')
+      
       if (args.author)
-        result = result.filter(book => book.author === args.author)
+        result = result.filter(book => book.author.name === args.author)
       if (args.genre)
         result = result.filter(book => book.genres.includes(args.genre))
 
@@ -89,12 +84,11 @@ const resolvers = {
 
       const book = new Book({ ...args, author: author._id })
       await book.save()
+
+      book.author.name = author.name
       return book
     },
     editAuthor: async (root, args) => {
-      // if (!args.name)
-      //   return null
-
       const author = await Author.findOne({ name: args.name })
 
       if (!author)

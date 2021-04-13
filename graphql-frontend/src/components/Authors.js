@@ -12,7 +12,7 @@ const Authors = (props) => {
   const [ editAuthor, result ] = useMutation(EDIT_AUTHOR, {
     refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
-      props.setError("All fields must be filled out")
+      props.setError("All fields must be filled out to update birth year")
     }
   })
 
@@ -35,6 +35,8 @@ const Authors = (props) => {
     }
   }, [authorQuery])
 
+  // this results in ESLint error because of props not being in dependency array,
+  // but adding it there will result in infinite render issue
   useEffect(() => {
     if (result.data && result.data.editAuthor === null) { 
       props.setError('Author not found')
