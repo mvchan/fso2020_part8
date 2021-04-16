@@ -39,7 +39,7 @@ const Authors = (props) => {
   // but adding it there will result in infinite render issue
   useEffect(() => {
     if (result.data && result.data.editAuthor === null) { 
-      props.setError('Author not found')
+      props.setError('Could not change author\'s birth year')
     }
   }, [result.data])
 
