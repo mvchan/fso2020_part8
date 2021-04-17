@@ -10,9 +10,19 @@ const Authors = (props) => {
   // refetchQueries will update the cache for the other views
   // onError allows error handling
   const [ editAuthor, result ] = useMutation(EDIT_AUTHOR, {
-    refetchQueries: [{ query: ALL_AUTHORS }],
+    //refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
       props.setError("Error: " + error.message)
+    },
+    update: (store, response) => {
+      const dataInStore = store.readQuery({ query: ALL_AUTHORS })
+      store.writeQuery({
+        query: ALL_AUTHORS,     
+        data: {
+          ...dataInStore,
+          allAuthors: [ ...dataInStore.allAuthors ]
+        }
+      })
     }
   })
 
