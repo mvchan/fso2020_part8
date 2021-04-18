@@ -7,11 +7,23 @@ const Books = (props) => {
   const bookQuery = useQuery(ALL_BOOKS)
   const [books, setBooks] = useState(null)
 
+  const [genreFilter, setGenreFilter] = useState('all genres')
+  const [genreList, setGenreList] = useState(null)
+
   useEffect(() => {
     if (bookQuery.data) {
       setBooks(bookQuery.data.allBooks)
     }
-  }, [bookQuery])
+
+    if (books) {
+      // Set will disregard duplicates from being added
+      const genres = new Set()
+      books.forEach(book => {
+        book.genres.forEach( g => genres.add(g) )
+      })
+      setGenreList(Array.from(genres))
+    }
+  }, [bookQuery, books])
 
   if (!props.show || !books) {
     return null
@@ -20,7 +32,7 @@ const Books = (props) => {
   return (
     <div>
       <h2>books</h2>
-
+      <p>in genre <b>{genreFilter}</b></p>
       <table>
         <tbody>
           <tr>
@@ -32,7 +44,7 @@ const Books = (props) => {
               published
             </th>
           </tr>
-          {books.map(a =>
+          {books.filter(book => book.genres.includes(genreFilter) || genreFilter === 'all genres').map(a =>
             <tr key={a.title}>
               <td>{a.title}</td>
               <td>{a.author.name}</td>
@@ -41,6 +53,12 @@ const Books = (props) => {
           )}
         </tbody>
       </table>
+      <div>
+        {genreList.map(g => 
+          <button key={g} onClick={() => setGenreFilter(g)}>{g}</button>
+        )}
+        <button onClick={() => setGenreFilter('all genres')}>all genres</button>
+      </div>
     </div>
   )
 }
