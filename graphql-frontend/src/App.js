@@ -41,7 +41,7 @@ const App = () => {
   useEffect(() => {
     const tokenFromStorage = localStorage.getItem('booklist-user-token', token)
     setToken(tokenFromStorage)
-  },[])
+  },[token])
 
   return (
     <div>

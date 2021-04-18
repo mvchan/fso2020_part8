@@ -9,6 +9,8 @@ const Authors = (props) => {
 
   // refetchQueries will update the cache for the other views
   // onError allows error handling
+  // update is alternative to refetchQueries that is possibly optimized
+  // in this situation, the edited author is filtered out and re-added through response.data
   const [ editAuthor, result ] = useMutation(EDIT_AUTHOR, {
     //refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
@@ -20,7 +22,7 @@ const Authors = (props) => {
         query: ALL_AUTHORS,     
         data: {
           ...dataInStore,
-          allAuthors: [ ...dataInStore.allAuthors ]
+          allAuthors: [ ...dataInStore.allAuthors.filter(author => author.name !== response.data.editAuthor.name), response.data.editAuthor ]
         }
       })
     }

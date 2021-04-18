@@ -11,10 +11,22 @@ const NewBook = (props) => {
 
   // refetchQueries will update the cache for the other views
   // onError allows error handling
+  // update is alternative to refetchQueries that is possibly optimized
+  // in this situation, the new book is added through response.data
   const [ addBook ] = useMutation(ADD_BOOK, {
-    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }],
+    refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
       props.setError("Error: " + error.message)
+    },
+    update: (store, response) => {
+      const dataInStore = store.readQuery({ query: ALL_BOOKS })
+      store.writeQuery({
+        query: ALL_BOOKS,     
+        data: {
+          ...dataInStore,
+          allBooks: [ ...dataInStore.allBooks, response.data.addBook ]
+        }
+      })
     }
   })
 
