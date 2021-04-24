@@ -1,40 +1,27 @@
 import React, { useState, useEffect } from 'react'
-import { useQuery, useMutation } from '@apollo/client'
-import { LOGIN, ME } from '../queries'
+import { useMutation } from '@apollo/client'
+import { LOGIN } from '../queries'
 
 const LoginForm = ({ setError, setToken, show, redirect }) => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
 
     const [ login, result ] = useMutation(LOGIN, {
-        //refetchQueries: [{ query: ME, fetchPolicy: 'network-only' }],
         onError: (error) => {
             setError(error.graphQLErrors[0].message)
         },
-        //onCompleted: () => meQuery.refetch({fetchPolicy: 'network-first'})
-        // update: (store, response) => {
-        //     const dataInStore = store.readQuery({ query: ME })
-        //     store.writeQuery({
-        //       query: ME,     
-        //       data: {
-        //         ...dataInStore,
-        //         me: { username: "manually_changed", favoriteGenre: "crime" }
-        //       }
-        //     })
-        //   }
-    })
-
-    // save token to local storage if login is successful
-    useEffect(() => {
-        if ( result.data ) {
-            const token = result.data.login.value
-            setToken(token)
-            localStorage.setItem('booklist-user-token', token)
-            setUsername('')
-            setPassword('')
-            redirect('authors')
+        onCompleted: (result) => {
+            if (result.login) {
+                // save token to local storage if login is successful
+                const token = result.login.value
+                localStorage.setItem('booklist-user-token', token)
+                setToken(token)
+                setUsername('')
+                setPassword('')
+                redirect('authors')
+            }
         }
-    }, [result.data]) // eslint-disable-line
+    })
     
     const submit = async (event) => {
         event.preventDefault()

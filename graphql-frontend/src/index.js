@@ -5,6 +5,7 @@ import { ApolloClient, ApolloProvider, HttpLink, InMemoryCache } from '@apollo/c
 import { setContext } from 'apollo-link-context'
 
 // retrieves token that was saved locally through LoginForm
+// this function runs for every mutation or query
 const authLink = setContext((_, { headers }) => {
     const token = localStorage.getItem('booklist-user-token')
 

@@ -1,31 +1,43 @@
 import React, { useState, useEffect } from 'react'
-import { useQuery } from '@apollo/client';
+import { useLazyQuery } from '@apollo/client';
 import { ALL_BOOKS, ME } from '../queries'
 
 const Recommendations = (props) => {
 
-    const userQuery = useQuery(ME)
+    const [getUser, userQuery] = useLazyQuery(ME, { fetchPolicy: 'cache-and-network' })
     const [user, setUser] = useState(null)
-    const bookQuery = useQuery(ALL_BOOKS)
-    const [books, setBooks] = useState(null)
 
+    const [getRecommendations, bookQuery] = useLazyQuery(ALL_BOOKS, { fetchPolicy: 'cache-and-network' })
+    const [recommendations, setRecommendations] = useState(null)
+
+    // fetch the user when this view is being shown
     useEffect(() => {
-        if (userQuery.data) {
-          setUser(userQuery.data.me)
-        }
+        if (props.show)
+            getUser()
+    },[props.show])
 
-        if (bookQuery.data) {
-            setBooks(bookQuery.data.allBooks)
-        }
-    }, [bookQuery, userQuery])
+    // fetch recommendations after user state has been set
+    useEffect(() => {
+        if (user)
+            getRecommendations({ variables: { genre: user.favoriteGenre }})
+    },[user, getRecommendations])
 
-    if (!props.show || !books) {
+    // set the states if query data changes (e.g. fetched, cleared)
+    useEffect(() => {
+        if (userQuery.data)
+            setUser(userQuery.data.me)
+        
+        if (bookQuery.data)
+            setRecommendations(bookQuery.data.allBooks)
+    }, [bookQuery.data, userQuery.data])
+
+    if (!props.show || !user || !recommendations) {
         return null
     }
     
     return (
         <div>
-          <h2>recommendations</h2>
+          <h2>{recommendations.length} recommendations</h2>
           <p>books in your favorite genre <b>{user.favoriteGenre}</b></p>
           <table>
             <tbody>
@@ -38,7 +50,7 @@ const Recommendations = (props) => {
                   published
                 </th>
               </tr>
-              {books.filter(book => book.genres.includes(user.favoriteGenre)).map(a =>
+              {recommendations.map(a =>
                 <tr key={a.title}>
                   <td>{a.title}</td>
                   <td>{a.author.name}</td>
