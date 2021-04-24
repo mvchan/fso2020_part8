@@ -12,7 +12,6 @@ const Authors = (props) => {
   // update is alternative to refetchQueries that is possibly optimized
   // in this situation, the edited author is filtered out and re-added through response.data
   const [ editAuthor, result ] = useMutation(EDIT_AUTHOR, {
-    //refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
       props.setError("Error: " + error.message)
     },
