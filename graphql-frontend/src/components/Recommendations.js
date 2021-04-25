@@ -14,7 +14,7 @@ const Recommendations = (props) => {
     useEffect(() => {
         if (props.show)
             getUser()
-    },[props.show])
+    },[props.show, getUser])
 
     // fetch recommendations after user state has been set
     useEffect(() => {
