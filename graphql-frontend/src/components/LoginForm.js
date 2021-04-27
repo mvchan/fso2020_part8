@@ -6,7 +6,7 @@ const LoginForm = ({ setError, setToken, show, redirect }) => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
 
-    const [ login, result ] = useMutation(LOGIN, {
+    const [ login ] = useMutation(LOGIN, {
         onError: (error) => {
             setError(error.graphQLErrors[0].message)
         },
