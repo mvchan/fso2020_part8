@@ -31,6 +31,15 @@ export const BOOK_ADDED = gql`
     ${BOOK_DETAILS}
 `
 
+export const AUTHOR_EDITED = gql`  
+    subscription {
+        authorEdited {
+            ...AuthorDetails
+        }
+    }  
+    ${AUTHOR_DETAILS}
+`
+
 //////   QUERIES   //////
 
 export const ALL_AUTHORS = gql`

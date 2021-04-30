@@ -11,19 +11,22 @@ const Authors = (props) => {
   // onError allows error handling
   // update is alternative to refetchQueries that is possibly optimized
   // in this situation, the edited author is filtered out and re-added through response.data
+  // Note: The update piece is now technically redundant due to the subscription hook in App.js
+  // that also updates the cache. It is left here for demonstration.
   const [ editAuthor, result ] = useMutation(EDIT_AUTHOR, {
     onError: (error) => {
       props.setError("Error: " + error.message)
     },
     update: (store, response) => {
-      const dataInStore = store.readQuery({ query: ALL_AUTHORS })
-      store.writeQuery({
-        query: ALL_AUTHORS,     
-        data: {
-          ...dataInStore,
-          allAuthors: [ ...dataInStore.allAuthors.filter(author => author.name !== response.data.editAuthor.name), response.data.editAuthor ]
-        }
-      })
+      // const dataInStore = store.readQuery({ query: ALL_AUTHORS })
+      // store.writeQuery({
+      //   query: ALL_AUTHORS,     
+      //   data: {
+      //     ...dataInStore,
+      //     allAuthors: [ ...dataInStore.allAuthors.filter(author => author.name !== response.data.editAuthor.name), response.data.editAuthor ]
+      //   }
+      // })
+      props.updateCacheWith('AUTHOR',response.data.editAuthor)
     }
   })
 

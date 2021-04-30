@@ -13,20 +13,23 @@ const NewBook = (props) => {
   // onError allows error handling
   // update is alternative to refetchQueries that is possibly optimized
   // in this situation, the new book is added through response.data
+  // Note: The update piece is now technically redundant due to the subscription hook in App.js
+  // that also updates the cache. It is left here for demonstration.
   const [ addBook ] = useMutation(ADD_BOOK, {
     refetchQueries: [{ query: ALL_AUTHORS }],
     onError: (error) => {
       props.setError("Error: " + error.message)
     },
     update: (store, response) => {
-      const dataInStore = store.readQuery({ query: ALL_BOOKS })
-      store.writeQuery({
-        query: ALL_BOOKS,     
-        data: {
-          ...dataInStore,
-          allBooks: [ ...dataInStore.allBooks, response.data.addBook ]
-        }
-      })
+      // const dataInStore = store.readQuery({ query: ALL_BOOKS })
+      // store.writeQuery({
+      //   query: ALL_BOOKS,     
+      //   data: {
+      //     ...dataInStore,
+      //     allBooks: [ ...dataInStore.allBooks, response.data.addBook ]
+      //   }
+      // })
+      props.updateCacheWith('BOOK',response.data.addBook)
     }
   })
 

@@ -79,6 +79,7 @@ const typeDefs = gql`
 
   type Subscription {
     bookAdded: Book!
+    authorEdited: Author!
   }    
 `
 
@@ -125,6 +126,7 @@ const resolvers = {
         book = new Book({ ...args, author: author._id })
         await book.save()
 
+        // book is currently missing author name value and must be added due to non-null type definition for type Author
         book.author.name = author.name
 
       } catch (error) {
@@ -155,6 +157,8 @@ const resolvers = {
           invalidArgs: args
         })
       }
+
+      pubsub.publish('AUTHOR_EDITED', { authorEdited: author })
 
       return author
     },
@@ -187,6 +191,9 @@ const resolvers = {
     bookAdded: {
       subscribe: () => pubsub.asyncIterator(['BOOK_ADDED'])
     },
+    authorEdited: {
+      subscribe: () => pubsub.asyncIterator(['AUTHOR_EDITED'])
+    }
   }
 }
 

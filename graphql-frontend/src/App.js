@@ -5,7 +5,7 @@ import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 import Recommendations from './components/Recommendations'
 import { useApolloClient, useSubscription } from '@apollo/client'
-import { BOOK_ADDED } from './queries'
+import { ALL_BOOKS, BOOK_ADDED, AUTHOR_EDITED, ALL_AUTHORS } from './queries'
 
 const Notify = ({ errorMessage }) => {
   if (!errorMessage)
@@ -40,10 +40,76 @@ const App = () => {
     }, 7000)
   }
 
+  const updateCacheWith = (type, addedElement) => {
+    const includedIn = (set, object) => 
+      set.map(p => p.id).includes(object.id)  
+
+    let dataInStore
+
+    switch (type) {
+      // for new books, the cache for the book collection and the author book count needs to be updated
+      case 'BOOK':
+        const addedBook = addedElement
+        dataInStore = client.readQuery({ query: ALL_BOOKS })
+        if (!includedIn(dataInStore.allBooks, addedBook)) {
+          client.writeQuery({
+            query: ALL_BOOKS,
+            data: { allBooks : dataInStore.allBooks.concat(addedBook) }
+          })
+
+          // add author to cache if not included
+          const authorToChange = addedBook.author
+          dataInStore = client.readQuery({ query: ALL_AUTHORS })
+          const authorObj = dataInStore.allAuthors.find(author => author.id === authorToChange.id)
+          if (!authorObj) {
+            client.writeQuery({
+              query: ALL_AUTHORS,
+              data: { allAuthors : dataInStore.allAuthors.concat({ ...authorToChange, bookCount: 1 }) }
+            })
+          } else {
+            const newAuthorObj = {
+              ...authorObj,
+              bookCount: authorObj.bookCount ? authorObj.bookCount + 1 : 1
+            }
+  
+            client.writeQuery({
+              query: ALL_AUTHORS,
+              data: {
+                ...dataInStore,
+                allAuthors: [ ...dataInStore.allAuthors.filter(author => author.id !== authorToChange.id), newAuthorObj ]
+              }
+            })
+          }
+        }
+        break
+      case 'AUTHOR':
+        dataInStore = client.readQuery({ query: ALL_AUTHORS })
+        client.writeQuery({
+          query: ALL_AUTHORS,
+          data: {
+            ...dataInStore,
+            allAuthors: [ ...dataInStore.allAuthors.filter(author => author.id !== addedElement.id), addedElement ]
+          }
+        })
+        break
+      default:
+    }
+
+  }
+
   useSubscription(BOOK_ADDED, {
     onSubscriptionData: ({ subscriptionData }) => {
-      console.log(subscriptionData)
-      notify('A NEW BOOK HAS BEEN ADDED!')
+      const addedBook = subscriptionData.data.bookAdded
+      notify(`${addedBook.title} added`)
+      updateCacheWith('BOOK',addedBook)
+    }
+  })
+
+  useSubscription(AUTHOR_EDITED, {
+    onSubscriptionData: ({ subscriptionData }) => {
+      const editedAuthor = subscriptionData.data.authorEdited
+      notify(`${editedAuthor.name} edited`)
+      updateCacheWith('AUTHOR',editedAuthor)
     }
   })
 
@@ -83,6 +149,7 @@ const App = () => {
       <NewBook
         show={page === 'add'}
         setError={notify}
+        updateCacheWith={updateCacheWith}
       />
 
       <Recommendations
