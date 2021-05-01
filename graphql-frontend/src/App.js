@@ -140,6 +140,7 @@ const App = () => {
       <Authors
         show={page === 'authors'}
         setError={notify}
+        updateCacheWith={updateCacheWith}
       />
 
       <Books

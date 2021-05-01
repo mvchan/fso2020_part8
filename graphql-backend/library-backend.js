@@ -22,6 +22,9 @@ mongoose.connect(config.MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology
     console.log('error connection to MongoDB:', error.message)
   })
 
+// only enable debug if troubleshooting (e.g. n+1 problem with bookCount)
+//mongoose.set('debug', true)
+
 const typeDefs = gql`
   type Author {
     name: String!
@@ -83,9 +86,15 @@ const typeDefs = gql`
   }    
 `
 
+// by default, there are built-in resolvers already defined for all each fields for all schema types.
+// e.g. for Author, the "books" field has a resolver which is (root) => root.books
+// fields that do not exist within the database should have a resolver, such as bookCount for type Author
 const resolvers = {
   Author: {
-    bookCount: async (root) => Book.find({ author: root._id }).countDocuments()
+    bookCount: async (root) => {
+      // return Book.find({ author: root._id }).countDocuments()
+      return root.books.length
+    }
   },
   
   Query: {
@@ -128,6 +137,9 @@ const resolvers = {
 
         // book is currently missing author name value and must be added due to non-null type definition for type Author
         book.author.name = author.name
+
+        author.books.push(book._id)
+        await author.save()
 
       } catch (error) {
         throw new UserInputError(error.message, {
