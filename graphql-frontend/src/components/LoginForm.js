@@ -34,6 +34,7 @@ const LoginForm = ({ setError, setToken, show, redirect }) => {
 
     return (
         <div>
+            <h2>login</h2>
             <form onSubmit={submit}>
             <div>
                 username <input

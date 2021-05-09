@@ -6,15 +6,18 @@ import LoginForm from './components/LoginForm'
 import Recommendations from './components/Recommendations'
 import { useApolloClient, useSubscription } from '@apollo/client'
 import { ALL_BOOKS, BOOK_ADDED, AUTHOR_EDITED, ALL_AUTHORS } from './queries'
+import { Button, Page, Navigation, Notification } from './components/styles'
+
+let TIMEOUT
 
 const Notify = ({ errorMessage }) => {
   if (!errorMessage)
     return null
 
   return (
-    <div style={{color: 'red'}}>
+    <Notification>
       {errorMessage}
-    </div>
+    </Notification>
   )
 }
 
@@ -34,10 +37,11 @@ const App = () => {
   }
 
   const notify = (message) => {
+    clearTimeout(TIMEOUT)
     setErrorMessage(message)
-    setTimeout(() => {
+    TIMEOUT = setTimeout(() => {
       setErrorMessage(null)
-    }, 7000)
+    }, 4000)
   }
 
   const updateCacheWith = (type, addedElement) => {
@@ -120,22 +124,22 @@ const App = () => {
   },[token])
 
   return (
-    <div>
+    <Page>
       <Notify errorMessage={errorMessage} />
-      <div>
-        <button onClick={() => setPage('authors')}>authors</button>
-        <button onClick={() => setPage('books')}>books</button>
+      <Navigation>
+        <Button active={page} name='authors' onClick={() => setPage('authors')}>authors</Button>
+        <Button active={page} name='books' onClick={() => setPage('books')}>books</Button>
         {!token
           ?
-          <button onClick={() => setPage('login')}>login</button>
+          <Button active={page} name='login' onClick={() => setPage('login')}>login</Button>
           :
           <>
-            <button onClick={() => setPage('add')}>add book</button>
-            <button onClick={() => setPage('recommendations')}>recommendations</button>
-            <button onClick={logout}>logout</button>
+            <Button active={page} name='add' onClick={() => setPage('add')}>add book</Button>
+            <Button active={page} name='recommendations' onClick={() => setPage('recommendations')}>recommendations</Button>
+            <Button active={page} name='logout' onClick={logout}>logout</Button>
           </>
         }
-      </div>
+      </Navigation>
 
       <Authors
         show={page === 'authors'}
@@ -163,7 +167,7 @@ const App = () => {
         setError={notify}
         redirect={setPage}
       />
-    </div>
+    </Page>
   )
 }
 
